@@ -11,6 +11,8 @@ export interface Habit {
 interface HabitState {
   habits: Habit[];
   addHabit: (name: string, frequency: "daily" | "weekly") => void;
+  removeHabit: (id: string) => void;
+  toggleHabit: (id: string, date: string) => void;
 }
 
 const useHabitStore = create<HabitState>()((set) => {
@@ -25,13 +27,30 @@ const useHabitStore = create<HabitState>()((set) => {
               id: Date.now().toString(),
               name,
               frequency,
-              completedDate: [],
+              completedDates: [],
               createdAt: new Date().toLocaleString(),
             },
           ],
         };
       });
     },
+    removeHabit: (id) =>
+      set((state) => ({
+        habits: state.habits.filter((habit) => habit.id !== id),
+      })),
+    toggleHabit: (id, date) =>
+      set((state) => ({
+        habits: state.habits.map((habit) =>
+          habit.id === id
+            ? {
+                ...habit,
+                completedDates: habit.completedDates.includes(date)
+                  ? habit.completedDates.filter((d) => d !== date)
+                  : [...habit.completedDates, date],
+              }
+            : habit,
+        ),
+      })),
   };
 });
 export default useHabitStore;
