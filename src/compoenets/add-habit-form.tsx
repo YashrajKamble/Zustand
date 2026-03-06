@@ -1,12 +1,25 @@
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { useState } from 'react'
+import useHabitStore from '../store/store';
 
 const AddHabitForm = () => {
     const [name, setName] = useState("");
     const [frequency, setFrequency] = useState<"daily" | "weekly">("daily")
 
+    const { habits, addHabit } = useHabitStore()
+
+    console.log(habits)
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (name.trim()) {
+            addHabit(name, frequency)
+            setName("")
+        }
+    }
+
     return (
-        <form>
+        <form onSubmit={handleSubmit}>
             <Box sx={{
                 display: 'flex',
                 flexDirection: "column",
