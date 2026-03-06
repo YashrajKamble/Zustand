@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
 
 export interface Habit {
   id: string;
@@ -15,42 +16,51 @@ interface HabitState {
   toggleHabit: (id: string, date: string) => void;
 }
 
-const useHabitStore = create<HabitState>()((set) => {
-  return {
-    habits: [],
-    addHabit: (name, frequency) => {
-      set((state) => {
+const useHabitStore = create<HabitState>()(
+  devtools(
+    persist(
+      (set) => {
         return {
-          habits: [
-            ...state.habits,
-            {
-              id: Date.now().toString(),
-              name,
-              frequency,
-              completedDates: [],
-              createdAt: new Date().toLocaleString(),
-            },
-          ],
+          habits: [],
+          addHabit: (name, frequency) => {
+            set((state) => {
+              return {
+                habits: [
+                  ...state.habits,
+                  {
+                    id: Date.now().toString(),
+                    name,
+                    frequency,
+                    completedDates: [],
+                    createdAt: new Date().toLocaleString(),
+                  },
+                ],
+              };
+            });
+          },
+          removeHabit: (id) =>
+            set((state) => ({
+              habits: state.habits.filter((habit) => habit.id !== id),
+            })),
+          toggleHabit: (id, date) =>
+            set((state) => ({
+              habits: state.habits.map((habit) =>
+                habit.id === id
+                  ? {
+                      ...habit,
+                      completedDates: habit.completedDates.includes(date)
+                        ? habit.completedDates.filter((d) => d !== date)
+                        : [...habit.completedDates, date],
+                    }
+                  : habit,
+              ),
+            })),
         };
-      });
-    },
-    removeHabit: (id) =>
-      set((state) => ({
-        habits: state.habits.filter((habit) => habit.id !== id),
-      })),
-    toggleHabit: (id, date) =>
-      set((state) => ({
-        habits: state.habits.map((habit) =>
-          habit.id === id
-            ? {
-                ...habit,
-                completedDates: habit.completedDates.includes(date)
-                  ? habit.completedDates.filter((d) => d !== date)
-                  : [...habit.completedDates, date],
-              }
-            : habit,
-        ),
-      })),
-  };
-});
+      },
+      {
+        name: "habits-local",
+      },
+    ),
+  ),
+);
 export default useHabitStore;
