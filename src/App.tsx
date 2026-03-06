@@ -1,14 +1,15 @@
-
 import './App.css'
-
+import useHabitStore from './store/store'
 
 function App() {
+  const store = useHabitStore()
+  console.log(store)
 
   return (
     <>
-     <div>
-      zustand
-     </div>
+      <div>
+        zustand
+      </div>
     </>
   )
 }
